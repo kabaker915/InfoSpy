@@ -1,4 +1,4 @@
-# 🔍 InfoSpy - 轻量级资产侦察与风险提示工具(1.1版本)
+# 🔍 InfoSpy - 轻量级资产侦察与风险提示工具 (1.1版本)
 
 InfoSpy 是一个用于网络安全初期资产发现的多线程端口扫描器，支持服务识别、弱口令检测和 HTML 报告生成。  
 适用于授权环境下的快速资产梳理和基础风险排查。
@@ -22,39 +22,30 @@ InfoSpy 是一个用于网络安全初期资产发现的多线程端口扫描器
 - Python 3.12 或更高版本
 - 推荐使用虚拟环境
 
-### 安装依赖
+### 克隆项目
+```bash
+git clone https://github.com/kabaker915/InfoSpy.git
+cd InfoSpy
+创建虚拟环境并安装依赖
+bash
 python -m venv venv
 source venv/bin/activate      # Linux/Mac
 venv\Scripts\activate         # Windows
 
 pip install -r requirements.txt
-
-### 基础扫描（使用内置常见端口）
+基础扫描（使用内置常见端口）
+bash
 python -m infospy.scanner scanme.nmap.org
-
-### 指定端口范围
+指定端口范围
+bash
 python -m infospy.scanner scanme.nmap.org -p "22,80,443"
 python -m infospy.scanner 192.168.1.1 -p "1-1000"
-
-### 启用弱口令检测（仅对支持的服务）
+启用弱口令检测（仅对支持的服务）
+bash
 python -m infospy.scanner scanme.nmap.org --weak
-
-### 调整并发线程数（默认是20）
+调整并发线程数（默认是20）
+bash
 python -m infospy.scanner scanme.nmap.org -t 10
-
-### 克隆项目
-```bash
-git clone https://github.com/kabaker915/InfoSpy.git
-cd InfoSpy
-
-# 创建虚拟环境（可选）
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-venv\Scripts\activate     # Windows
-
-# 运行扫描
-python -m infospy.scanner
-
 🧪 弱口令检测说明
 支持服务：FTP（21）、SSH（22）、Redis（6379）
 
@@ -79,7 +70,6 @@ InfoSpy/
 │   ├── __init__.py
 │   └── scanner.py          # 主程序
 └── requirements.txt        # 依赖列表
-
 🛠️ 技术栈
 Python 3.12+
 
