@@ -110,4 +110,4 @@ Python 3.12+
 
 📬 联系与贡献
 项目地址：https://github.com/kabaker915/InfoSpy
-欢迎提交 Issue 或 Pull Request.`**
+欢迎提交 Issue 或 Pull Request。
