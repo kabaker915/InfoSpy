@@ -1,0 +1,6 @@
+*.html
+dir
+git
+venv/
+__pycache__/
+*.pyc
