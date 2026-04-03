@@ -44,17 +44,20 @@ python -m infospy.scanner 192.168.1.1 -p "1-1000"
 ```
 启用弱口令检测（仅对支持的服务）
 
-bash
+```bash
 python -m infospy.scanner scanme.nmap.org --weak
 调整并发线程数（默认是20）
-bash
+```
+```bash
 python -m infospy.scanner scanme.nmap.org -t 10
+```
 🐳 Docker 方式（实验性）
 注意：以下配置尚未在本地完整测试，欢迎反馈问题。如果你有 Docker 环境，可以尝试以下步骤：
 
-bash
+```bash
 docker build -t infospy .
 docker run infospy scanme.nmap.org
+```
 国内用户可配置镜像加速器后再尝试。
 
 🪟 一键运行（Windows 用户，无需安装 Python）
