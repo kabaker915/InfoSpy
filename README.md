@@ -33,13 +33,17 @@ venv\Scripts\activate         # Windows
 ```
 pip install -r requirements.txt
 基础扫描（使用内置常见端口）
-bash
+```bash
 python -m infospy.scanner scanme.nmap.org
+```
 指定端口范围
-bash
+
+```bash
 python -m infospy.scanner scanme.nmap.org -p "22,80,443"
 python -m infospy.scanner 192.168.1.1 -p "1-1000"
+```
 启用弱口令检测（仅对支持的服务）
+
 bash
 python -m infospy.scanner scanme.nmap.org --weak
 调整并发线程数（默认是20）
