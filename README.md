@@ -26,11 +26,11 @@ cd InfoSpy
 ```
 创建虚拟环境并安装依赖
 
-bash
+```bash
 python -m venv venv
 source venv/bin/activate      # Linux/Mac
 venv\Scripts\activate         # Windows
-
+```
 pip install -r requirements.txt
 基础扫描（使用内置常见端口）
 bash
