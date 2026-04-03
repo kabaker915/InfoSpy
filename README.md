@@ -1,3 +1,4 @@
+markdown
 # 🔍 InfoSpy - 轻量级资产侦察与风险提示工具 (1.1版本)
 
 ![Python Version](https://img.shields.io/badge/python-3.12+-blue.svg)
