@@ -1,32 +1,25 @@
-# 🔍 InfoSpy - 轻量级资产侦察与风险提示工具 (1.1版本)
+🔍 InfoSpy - 轻量级资产侦察与风险提示工具 (1.1版本)
+Python Version License Platform
 
-![Python Version](https://img.shields.io/badge/python-3.12+-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
-![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)
-
-InfoSpy 是一个用于网络安全初期资产发现的多线程端口扫描器，支持服务识别、弱口令检测和 HTML 报告生成。  
+InfoSpy 是一个用于网络安全初期资产发现的多线程端口扫描器，支持服务识别、弱口令检测和 HTML 报告生成。
 适用于授权环境下的快速资产梳理和基础风险排查。
 
----
+✨ 功能特性
+🚀 多线程端口扫描 – 可自定义端口范围和并发线程数，扫描效率高
+🧬 服务/Banner 识别 – 支持 HTTP、SSH、SMTP、POP3、IMAP 等常见服务的版本探测
+🔐 弱口令检测 – 支持 FTP、SSH、Redis（可扩展），需显式启用 --weak 参数
+📄 HTML 报告 – 自动生成带端口列表和弱口令结果的可视化报告
+🎛️ 命令行友好 – 支持目标指定、端口范围、线程数等灵活参数
+🛡️ 安全设计 – 默认仅做无损扫描，弱口令检测不会发送恶意载荷
 
-## ✨ 功能特性
+📦 安装与使用
 
-- 🚀 **多线程端口扫描** – 可自定义端口范围和并发线程数，扫描效率高
-- 🧬 **服务/Banner 识别** – 支持 HTTP、SSH、SMTP、POP3、IMAP 等常见服务的版本探测
-- 🔐 **弱口令检测** – 支持 FTP、SSH、Redis（可扩展），需显式启用 `--weak` 参数
-- 📄 **HTML 报告** – 自动生成带端口列表和弱口令结果的可视化报告
-- 🎛️ **命令行友好** – 支持目标指定、端口范围、线程数等灵活参数
-- 🛡️ **安全设计** – 默认仅做无损扫描，弱口令检测不会发送恶意载荷
-
----
-
-## 📦 安装与使用
-
-### 环境要求
+环境要求
 - Python 3.12 或更高版本
 - 推荐使用虚拟环境
 
 ### 克隆项目
+
 ```bash
 git clone https://github.com/kabaker915/InfoSpy.git
 cd InfoSpy
@@ -79,6 +72,7 @@ infospy.exe scanme.nmap.org
 如需添加更多服务（如 MySQL、MongoDB），只需在 WEAK_CHECKERS 字典中扩展即可。
 
 📂 项目结构
+
 text
 InfoSpy/
 ├── .gitignore
@@ -88,6 +82,7 @@ InfoSpy/
 │   └── scanner.py          # 主程序
 └── requirements.txt        # 依赖列表
 🛠️ 技术栈
+
 Python 3.12+
 
 标准库：socket, threading, argparse, datetime, ftplib
@@ -95,6 +90,7 @@ Python 3.12+
 第三方库：paramiko (SSH 客户端)
 
 📌 未来计划
+
 增加 MySQL、MongoDB、HTTP Basic Auth 弱口令检测
 
 提供 Docker 镜像，支持一键运行（完善测试）
