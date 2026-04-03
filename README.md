@@ -20,7 +20,7 @@ InfoSpy 是一个用于网络安全初期资产发现的多线程端口扫描器
 
 ### 克隆项目
 
-```bash
+```bash`
 git clone https://github.com/kabaker915/InfoSpy.git
 cd InfoSpy
 创建虚拟环境并安装依赖
