@@ -64,7 +64,9 @@ docker run infospy scanme.nmap.org
 从 Releases 下载 infospy.exe，然后在命令提示符中运行：
 
 cmd
+```bash
 infospy.exe scanme.nmap.org
+```
 🧪 弱口令检测说明
 支持服务：FTP（21）、SSH（22）、Redis（6379）
 
@@ -81,7 +83,7 @@ infospy.exe scanme.nmap.org
 如需添加更多服务（如 MySQL、MongoDB），只需在 WEAK_CHECKERS 字典中扩展即可。
 
 📂 项目结构
-
+```bash
 text
 InfoSpy/
 ├── .gitignore
@@ -90,6 +92,7 @@ InfoSpy/
 │   ├── __init__.py
 │   └── scanner.py          # 主程序
 └── requirements.txt        # 依赖列表
+```
 🛠️ 技术栈
 
 Python 3.12+
