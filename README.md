@@ -184,7 +184,6 @@ Windows / Linux / macOS
 MIT License
 
 ⚠️ 免责声明
-<<<<<<< HEAD
 本工具仅限用于授权安全测试，未经授权使用可能违反法律法规。使用者需自行承担相关责任。
 =======
 本工具仅限用于授权的安全测试、个人学习或合法评估。
@@ -194,4 +193,4 @@ MIT License
 📬 联系与贡献
 项目地址：https://github.com/kabaker915/InfoSpy
 欢迎提交 Issue 或 Pull Request。
->>>>>>> 8539f9dfb161e7072d54099c682d1a612b8e5f43
+
