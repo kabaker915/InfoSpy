@@ -1,0 +1,6 @@
+version: '3.8'
+
+services:
+  infospy:
+    build: .
+    command: scanme.nmap.org   # 默认扫描目标
