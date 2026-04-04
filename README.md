@@ -45,36 +45,38 @@ InfoSpy 是一个用于网络安全初期资产发现的多线程端口扫描器
 
 ### 克隆项目
 
->>>>>>> 8539f9dfb161e7072d54099c682d1a612b8e5f43
 ```bash
 # 克隆仓库
 git clone https://github.com/YOUR_USERNAME/InfoSpy.git
 cd InfoSpy
-<<<<<<< HEAD
+```
 
 # 创建虚拟环境（推荐）
+```bash
 python -m venv venv
 source venv/bin/activate      # Linux/Mac
 venv\Scripts\activate         # Windows
+```
 
 # 安装依赖
 pip install paramiko
 🚀 使用方法
 基础扫描（默认端口）
-bash
+```bash
 python -m infospy.scanner scanme.nmap.org
+```
 自定义端口
-bash
+```bash
 python -m infospy.scanner 192.168.1.1 -p 22,80,443
 python -m infospy.scanner 192.168.1.1 -p 1-1000
+
 启用弱口令检测
-bash
+```bash
 python -m infospy.scanner scanme.nmap.org --weak
 调整并发线程数
-bash
+```bash
 python -m infospy.scanner target.com -t 50 --weak
 📊 输出示例
-text
 📡 使用默认常见端口: 共 26 个
 🌐 目标解析: scanme.nmap.org -> 45.33.32.156
 🔍 正在扫描 45.33.32.156，共 26 个端口（并发线程数: 20）
@@ -152,29 +154,9 @@ InfoSpy/
 ```
 🛠️ 技术栈
 
-Python 3.12+
->>>>>>> 8539f9dfb161e7072d54099c682d1a612b8e5f43
-
-✅ [1/26] 端口    22 开放 | SSH-2.0-OpenSSH_6.6.1p1 Ubuntu-2ubuntu2.13
-✅ [2/26] 端口    80 开放 | HTTP/1.1 200 OK
-
-✅ 扫描完成。发现 5 个开放端口。
-
-<<<<<<< HEAD
-🔐 开始弱口令检测...
-  尝试 22 端口 (SSH) ...
-    ❌ 未发现弱口令
-=======
 📌 未来计划
 
 增加 MySQL、MongoDB、HTTP Basic Auth 弱口令检测
->>>>>>> 8539f9dfb161e7072d54099c682d1a612b8e5f43
-
-📄 报告已保存: report_45.33.32.156_20260404_142657.html
-📁 生成报告
-运行后会生成 report_<IP>_<时间戳>.html，在浏览器中打开即可查看详细的风险分析和修复建议。
-
-https://screenshot.png
 
 🛠️ 支持的弱口令服务
 服务	端口	默认字典
