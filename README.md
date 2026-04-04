@@ -13,12 +13,8 @@ InfoSpy 是一个用于网络安全初期资产发现的多线程端口扫描器
 适用于授权环境下的快速资产梳理和基础风险排查。
 
 ✨ 功能特性
-🚀 多线程端口扫描 – 可自定义端口范围和并发线程数，扫描效率高
->>>>>>> 8539f9dfb161e7072d54099c682d1a612b8e5f43
-
-🧬 服务/Banner 识别 – 支持 HTTP、SSH、SMTP、POP3、IMAP 等常见服务的版本探测
-
-<<<<<<< HEAD
+- 🚀 多线程端口扫描 – 可自定义端口范围和并发线程数，扫描效率高
+- 🧬 服务/Banner 识别 – 支持 HTTP、SSH、SMTP、POP3、IMAP 等常见服务的版本探测
 - 🚀 **多线程端口扫描** – 支持自定义端口范围，默认 26 个常见端口
 - 🔍 **服务识别** – 自动获取 banner，识别 25+ 种常见服务
 - 🔐 **弱口令检测** – 支持 FTP、SSH、Redis 常见弱口令爆破
@@ -69,13 +65,15 @@ python -m infospy.scanner scanme.nmap.org
 ```bash
 python -m infospy.scanner 192.168.1.1 -p 22,80,443
 python -m infospy.scanner 192.168.1.1 -p 1-1000
-
+```
 启用弱口令检测
 ```bash
 python -m infospy.scanner scanme.nmap.org --weak
+```
 调整并发线程数
 ```bash
 python -m infospy.scanner target.com -t 50 --weak
+```
 📊 输出示例
 📡 使用默认常见端口: 共 26 个
 🌐 目标解析: scanme.nmap.org -> 45.33.32.156
