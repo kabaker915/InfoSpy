@@ -75,9 +75,13 @@ python -m infospy.scanner scanme.nmap.org --weak
 python -m infospy.scanner target.com -t 50 --weak
 ```
 📊 输出示例
+
 📡 使用默认常见端口: 共 26 个
+
 🌐 目标解析: scanme.nmap.org -> 45.33.32.156
+
 🔍 正在扫描 45.33.32.156，共 26 个端口（并发线程数: 20）
+
 ⚠️  弱口令检测已启用（仅对支持的服务）
 =======
 ```
