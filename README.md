@@ -3,7 +3,7 @@
 
 轻量级资产侦察与风险提示工具 - 多线程端口扫描、服务识别、弱口令检测、风险评级、HTML报告生成
 
-[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://python.org)
+[![Python Version](https://img.shields.io/badge/python-3.12%2B-blue)](https://python.org)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 =======
 🔍 InfoSpy - 轻量级资产侦察与风险提示工具 (1.1版本)
