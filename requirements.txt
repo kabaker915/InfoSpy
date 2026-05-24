@@ -1,1 +1,5 @@
 paramiko
+pymysql
+pymongo
+requests
+tqdm
