@@ -3,3 +3,4 @@ pymysql
 pymongo
 requests
 tqdm
+pyyaml
