@@ -1,6 +1,8 @@
 *.html
-dir
-git
 venv/
 __pycache__/
 *.pyc
+build/
+dist/
+*.spec
+*.exe

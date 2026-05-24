@@ -10,10 +10,12 @@ import socket
 import time
 import argparse
 import ftplib
+import html
 import paramiko
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
+from typing import Optional
 
 # ========== 1. 配置区域 ==========
 DEFAULT_PORTS = [21, 22, 23, 25, 53, 80, 110, 111, 135, 139, 143, 443, 445,
@@ -84,7 +86,7 @@ RISK_RULES = {
 DEFAULT_RISK = ("信息", "通用服务端口", "请根据实际业务评估风险，限制访问来源")
 
 # ========== 2. 端口扫描 ==========
-def scan_port(ip, port, timeout=2.0):
+def scan_port(ip: str, port: int, timeout: float = 2.0) -> bool:
     """检测端口是否开放"""
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -94,8 +96,8 @@ def scan_port(ip, port, timeout=2.0):
     except Exception:
         return False
 
-def get_banner(ip, port, timeout=4.0):
-    """获取服务 Banner，使用 with 确保 socket 正确关闭"""
+def get_banner(ip: str, port: int, timeout: float = 4.0) -> str:
+    """获取服务 Banner"""
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.settimeout(timeout)
@@ -104,14 +106,7 @@ def get_banner(ip, port, timeout=4.0):
             if probe:
                 sock.send(probe)
                 time.sleep(0.5)
-            banner = b""
-            try:
-                banner = sock.recv(1024)
-            except socket.timeout:
-                time.sleep(0.5)
-                banner = sock.recv(1024)
-            except ConnectionResetError:
-                return "[Connection reset by peer]"
+            banner = sock.recv(1024)
             if not banner:
                 return "[No banner]"
             banner_str = banner.decode('utf-8', errors='ignore').strip()
@@ -125,10 +120,10 @@ def get_banner(ip, port, timeout=4.0):
         return "[Connection refused]"
     except ConnectionResetError:
         return "[Connection reset]"
-    except Exception as e:
+    except OSError as e:
         return f"[Error: {type(e).__name__}]"
 
-def scan_and_identify(ip, port):
+def scan_and_identify(ip: str, port: int) -> Optional[tuple[int, str]]:
     """扫描端口并获取 banner"""
     if scan_port(ip, port):
         banner = get_banner(ip, port)
@@ -136,60 +131,57 @@ def scan_and_identify(ip, port):
     return None
 
 # ========== 3. 弱口令检测 ==========
-def check_ftp(ip, port, user, password, timeout=3):
+def check_ftp(ip: str, port: int, user: str, password: str, timeout: int = 3) -> bool:
+    ftp = ftplib.FTP()
     try:
-        ftp = ftplib.FTP()
         ftp.connect(ip, port, timeout=timeout)
         ftp.login(user, password)
         ftp.quit()
         return True
     except Exception:
+        try:
+            ftp.quit()
+        except Exception:
+            pass
         return False
 
-def check_redis(ip, port, password, timeout=3):
-    sock = None
+def check_redis(ip: str, port: int, password: str, timeout: int = 3) -> bool:
     try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(timeout)
-        sock.connect((ip, port))
-        if password:
-            sock.send(f"AUTH {password}\r\n".encode())
-            resp = sock.recv(1024).decode()
-            if resp.startswith('+OK'):
-                return True
-        else:
-            sock.send(b"PING\r\n")
-            resp = sock.recv(1024).decode()
-            if resp.startswith('+PONG'):
-                return True
-        return False
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.settimeout(timeout)
+            sock.connect((ip, port))
+            if password:
+                sock.send(f"AUTH {password}\r\n".encode())
+                resp = sock.recv(1024).decode()
+                if resp.startswith('+OK'):
+                    return True
+            else:
+                sock.send(b"PING\r\n")
+                resp = sock.recv(1024).decode()
+                if resp.startswith('+PONG'):
+                    return True
+            return False
     except Exception:
         return False
-    finally:
-        if sock:
-            sock.close()
 
-def check_ssh(ip, port, user, password, timeout=5, retries=2):
-    """
-    增强版 SSH 弱口令检测：支持重试，更长超时，避免 banner 读取异常
-    """
+def check_ssh(ip: str, port: int, user: str, password: str, timeout: int = 5, retries: int = 2) -> bool:
+    """增强版 SSH 弱口令检测：支持重试，更长超时，避免 banner 读取异常"""
     for attempt in range(retries):
         try:
             client = paramiko.SSHClient()
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             client.connect(
                 ip, port=port, username=user, password=password,
-                timeout=timeout,           # socket 超时
-                banner_timeout=timeout,    # banner 读取超时
+                timeout=timeout,
+                banner_timeout=timeout,
                 allow_agent=False, look_for_keys=False
             )
             client.close()
             return True
-        except (paramiko.SSHException, EOFError, socket.timeout) as e:
+        except (paramiko.SSHException, EOFError, socket.timeout):
             if attempt == retries - 1:
-                # 最后一次失败，静默返回
                 return False
-            time.sleep(1)   # 重试前等待
+            time.sleep(1)
         except Exception:
             return False
     return False
@@ -200,7 +192,7 @@ WEAK_CHECKERS = {
     6379: (check_redis, 'redis'),
 }
 
-def test_weak_credentials(ip, port, service_type):
+def test_weak_credentials(ip: str, port: int, service_type: str) -> list[tuple[str, str]]:
     """对指定服务进行弱口令测试，返回成功凭据列表"""
     success = []
     if service_type == 'ftp':
@@ -221,7 +213,7 @@ def test_weak_credentials(ip, port, service_type):
     return success
 
 # ========== 4. 风险评级 ==========
-def get_risk_info(port, weak_found=False):
+def get_risk_info(port: int, weak_found: bool = False) -> tuple[str, str, str]:
     if port in RISK_RULES:
         level, description, advice = RISK_RULES[port]
     else:
@@ -240,42 +232,44 @@ def get_risk_info(port, weak_found=False):
     return level, description, advice
 
 # ========== 5. 生成 HTML 报告 ==========
-def generate_html_report(target_ip, open_ports_info, weak_results, scan_time):
+def generate_html_report(target_ip: str, open_ports_info: list[tuple[int, str]],
+                         weak_results: dict[int, list[tuple[str, str]]],
+                         scan_time: str, output_path: Optional[str] = None) -> None:
     rows = ""
     for port, banner in open_ports_info:
         weak_found = port in weak_results and weak_results[port]
         risk_level, risk_desc, risk_advice = get_risk_info(port, weak_found)
-        level_class = ""
-        if risk_level == "严重":
-            level_class = "critical"
-        elif risk_level == "高危":
-            level_class = "high"
-        elif risk_level == "中危":
-            level_class = "medium"
-        elif risk_level == "低危":
-            level_class = "low"
-        else:
-            level_class = "info"
+        level_class = {
+            "严重": "critical",
+            "高危": "high",
+            "中危": "medium",
+            "低危": "low",
+        }.get(risk_level, "info")
+        # 转义用户可控内容，防止 XSS
+        safe_banner = html.escape(banner)
+        safe_desc = html.escape(risk_desc)
+        safe_advice = html.escape(risk_advice)
         rows += f"""
         <tr>
             <td>{port}</td>
-            <td>{banner}</td>
+            <td>{safe_banner}</td>
             <td class="{level_class}">{risk_level}</td>
-            <td>{risk_desc}</td>
-            <td>{risk_advice}</td>
+            <td>{safe_desc}</td>
+            <td>{safe_advice}</td>
         </tr>
         """
 
     weak_rows = ""
     for port, creds in weak_results.items():
-        creds_str = ", ".join([f"{u}:{p}" for u, p in creds]) if creds else "无"
+        creds_str = ", ".join([f"{html.escape(u)}:{html.escape(p)}" for u, p in creds]) if creds else "无"
         weak_rows += f"<tr><td>{port}</td><td>{creds_str}</td></tr>"
 
-    html = f"""<!DOCTYPE html>
+    safe_target = html.escape(target_ip)
+    html_content = f"""<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>InfoSpy 风险报告 - {target_ip}</title>
+    <title>InfoSpy 风险报告 - {safe_target}</title>
     <style>
         body {{ font-family: Arial; margin: 40px; background: #f0f2f5; }}
         .container {{ max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 10px; }}
@@ -297,8 +291,8 @@ def generate_html_report(target_ip, open_ports_info, weak_results, scan_time):
 <div class="container">
     <h1>🔍 InfoSpy 安全风险评估报告</h1>
     <div class="info">
-        <strong>目标：</strong> {target_ip}<br>
-        <strong>扫描时间：</strong> {scan_time}<br>
+        <strong>目标：</strong> {safe_target}<br>
+        <strong>扫描时间：</strong> {html.escape(scan_time)}<br>
         <strong>开放端口数：</strong> {len(open_ports_info)}
     </div>
     <h2>端口风险分析</h2>
@@ -317,19 +311,21 @@ def generate_html_report(target_ip, open_ports_info, weak_results, scan_time):
 </div>
 </body>
 </html>"""
-    filename = f"report_{target_ip}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html"
-    with open(filename, "w", encoding="utf-8") as f:
-        f.write(html)
-    print(f"\n📄 报告已保存: {filename}")
+    if not output_path:
+        output_path = f"report_{target_ip}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html"
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(html_content)
+    print(f"\n📄 报告已保存: {output_path}")
 
 # ========== 6. 主扫描逻辑 ==========
-def main(target_ip, port_list, max_workers=20, weak_mode=False):
+def main(target_ip: str, port_list: list[int], max_workers: int = 20,
+         weak_mode: bool = False, output_path: Optional[str] = None) -> None:
     print(f"🔍 正在扫描 {target_ip}，共 {len(port_list)} 个端口（并发线程数: {max_workers}）")
     if weak_mode:
         print("⚠️  弱口令检测已启用（仅对支持的服务）")
     print()
 
-    open_ports_info = []
+    open_ports_info: list[tuple[int, str]] = []
     completed = 0
     total = len(port_list)
 
@@ -345,9 +341,12 @@ def main(target_ip, port_list, max_workers=20, weak_mode=False):
             if completed % 10 == 0:
                 print(f"📊 进度: {completed}/{total} ({completed*100//total}%)")
 
+    # 按端口号排序输出
+    open_ports_info.sort(key=lambda x: x[0])
+
     print(f"\n✅ 扫描完成。发现 {len(open_ports_info)} 个开放端口。")
 
-    weak_results = {}
+    weak_results: dict[int, list[tuple[str, str]]] = {}
     if weak_mode and open_ports_info:
         print("\n🔐 开始弱口令检测...")
         # 关键修复：等待 1 秒，避免触发 SSH 服务器的连接频率限制
@@ -366,23 +365,49 @@ def main(target_ip, port_list, max_workers=20, weak_mode=False):
             else:
                 print(f"   ⚠️ 端口 {port} 暂不支持弱口令检测")
 
-    generate_html_report(target_ip, open_ports_info, weak_results, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    generate_html_report(target_ip, open_ports_info, weak_results,
+                         datetime.now().strftime("%Y-%m-%d %H:%M:%S"), output_path)
 
 # ========== 7. 命令行入口 ==========
+def parse_ports(ports_str: str) -> list[int]:
+    """解析端口参数，支持 '22,80,443' 和 '1-1000' 格式"""
+    ports = []
+    if '-' in ports_str:
+        parts = ports_str.split('-')
+        if len(parts) != 2:
+            raise ValueError(f"无效的端口范围格式: {ports_str}")
+        start, end = int(parts[0]), int(parts[1])
+        if not (1 <= start <= 65535 and 1 <= end <= 65535):
+            raise ValueError(f"端口号必须在 1-65535 范围内: {ports_str}")
+        if start > end:
+            raise ValueError(f"端口范围起始值不能大于结束值: {ports_str}")
+        ports = list(range(start, end + 1))
+    else:
+        for p in ports_str.split(','):
+            p = p.strip()
+            if not p:
+                continue
+            port_num = int(p)
+            if not (1 <= port_num <= 65535):
+                raise ValueError(f"端口号必须在 1-65535 范围内: {port_num}")
+            ports.append(port_num)
+    return ports
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="InfoSpy - 端口扫描与服务识别，支持弱口令检测和风险评级")
     parser.add_argument("target", help="目标 IP 或域名")
     parser.add_argument("-p", "--ports", help="端口范围，如 '22,80,443' 或 '1-1000'", default="")
     parser.add_argument("-t", "--threads", type=int, default=20, help="并发线程数 (默认 20)")
     parser.add_argument("--weak", action="store_true", help="启用弱口令检测（支持 FTP, SSH, Redis）")
+    parser.add_argument("-o", "--output", help="自定义报告输出路径", default="")
     args = parser.parse_args()
 
     if args.ports:
-        if '-' in args.ports:
-            start, end = map(int, args.ports.split('-'))
-            port_list = list(range(start, end+1))
-        else:
-            port_list = [int(p.strip()) for p in args.ports.split(',') if p.strip().isdigit()]
+        try:
+            port_list = parse_ports(args.ports)
+        except ValueError as e:
+            print(f"❌ 端口参数错误: {e}")
+            exit(1)
         print(f"📡 自定义端口列表: 共 {len(port_list)} 个端口")
     else:
         port_list = DEFAULT_PORTS
@@ -392,8 +417,9 @@ if __name__ == "__main__":
         ip = socket.gethostbyname(args.target)
         print(f"🌐 目标解析: {args.target} -> {ip}")
         target = ip
-    except:
+    except (socket.gaierror, OSError):
         target = args.target
         print(f"🌐 目标: {target}")
 
-    main(target, port_list, max_workers=args.threads, weak_mode=args.weak)
+    main(target, port_list, max_workers=args.threads, weak_mode=args.weak,
+         output_path=args.output if args.output else None)
